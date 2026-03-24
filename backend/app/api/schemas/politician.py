@@ -30,10 +30,10 @@ class ActivityResponse(BaseModel):
     term_number: int | None = None
     session_name: str | None = None
     attendance_percentage: float | None = None
-    questions_asked: int = 0
-    debates_participated: int = 0
-    private_bills_introduced: int = 0
-    committee_memberships: int = 0
+    questions_asked: int | None = 0
+    debates_participated: int | None = 0
+    private_bills_introduced: int | None = 0
+    committee_memberships: int | None = 0
     committee_names: list[str] | None = None
 
 
@@ -43,8 +43,8 @@ class DisclosureResponse(BaseModel):
     movable_assets: float | None = None
     immovable_assets: float | None = None
     total_liabilities: float | None = None
-    criminal_cases: int = 0
-    serious_criminal_cases: int = 0
+    criminal_cases: int | None = 0
+    serious_criminal_cases: int | None = 0
     affidavit_complete: bool = False
 
 
