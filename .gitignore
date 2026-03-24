@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+
+# Environment
+.env
+.env.local
+
+# Data (too large for git)
+backend/data/
+
+# Database
+*.db
+*.sqlite3
+
+# Build
+.next/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Planning (local only)
+.planning/

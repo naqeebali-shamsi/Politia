@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "n:\\Politia\\logs\\.fbe0d0fb5dd0d5c864ec8857967756d5ca8b93a8-audit.json",
+    "files": [
+        {
+            "date": 1773986633435,
+            "name": "n:\\Politia\\logs\\mcp-puppeteer-2026-03-20.log",
+            "hash": "f3d4c442e014702218e5bec5e9f8bc8942614f5b9cb18de0aea93b4394e7e637"
+        },
+        {
+            "date": 1774150160941,
+            "name": "n:\\Politia\\logs\\mcp-puppeteer-2026-03-22.log",
+            "hash": "5089773468bd9dbdfcb74582913359690e08dd6bb9352807d3938808e3096c30"
+        }
+    ],
+    "hashType": "sha256"
+}
