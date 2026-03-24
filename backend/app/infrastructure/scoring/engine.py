@@ -7,6 +7,34 @@ from app.infrastructure.scoring.strategies.disclosure import DisclosureStrategy
 from app.infrastructure.scoring.strategies.integrity import IntegrityStrategy
 
 
+def has_sufficient_data(has_activity: bool, has_disclosure: bool) -> bool:
+    """A politician needs at least one non-election data source to be scored."""
+    return has_activity or has_disclosure
+
+
+def compute_data_coverage(
+    has_activity: bool, has_disclosure: bool, election_count: int = 0,
+) -> int:
+    """
+    Compute a 0-100 data coverage score indicating how much data backs a profile.
+    Used as a confidence indicator alongside the accountability score.
+    """
+    coverage = 0
+
+    # Election records: up to 15 points
+    coverage += min(election_count * 5, 15)
+
+    # Activity data: 45 points
+    if has_activity:
+        coverage += 45
+
+    # Disclosure data: 40 points
+    if has_disclosure:
+        coverage += 40
+
+    return min(coverage, 100)
+
+
 class ScoringEngine:
     """
     Computes accountability scores using pluggable strategies.
@@ -68,4 +96,21 @@ class ScoringEngine:
             formula_version=self.VERSION,
             computed_at=datetime.now(timezone.utc),
             is_current=True,
+        )
+
+    def compute_score_if_sufficient(
+        self,
+        politician_id: int,
+        participation_data: dict,
+        disclosure_data: dict,
+        integrity_data: dict,
+        has_activity: bool = False,
+        has_disclosure: bool = False,
+        baselines: dict | None = None,
+    ) -> ScoreRecord | None:
+        """Compute score only if sufficient data exists. Returns None otherwise."""
+        if not has_sufficient_data(has_activity, has_disclosure):
+            return None
+        return self.compute_score(
+            politician_id, participation_data, disclosure_data, integrity_data, baselines,
         )
