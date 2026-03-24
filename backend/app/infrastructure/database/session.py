@@ -2,6 +2,7 @@ from collections.abc import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from sqlalchemy.pool import NullPool
 
 from app.config import get_settings
 
@@ -20,6 +21,9 @@ def get_engine():
 
         if settings.database_url.startswith("sqlite"):
             connect_args["check_same_thread"] = False
+        elif "pooler" in settings.database_url or "neon.tech" in settings.database_url:
+            # Neon pooler handles connection pooling server-side; use NullPool
+            kwargs["poolclass"] = NullPool
         else:
             kwargs["pool_size"] = settings.database_pool_size
             kwargs["max_overflow"] = settings.database_max_overflow
