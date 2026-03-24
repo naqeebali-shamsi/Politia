@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { getLeaderboard, getFilters } from '@/lib/api';
 import LeaderboardTable from './LeaderboardTable';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
 export default async function LeaderboardPage({
   searchParams,
 }: {

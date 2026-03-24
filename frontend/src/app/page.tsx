@@ -1,29 +1,7 @@
 import Link from 'next/link';
-import { searchPoliticians, getLeaderboard, getFilters } from '@/lib/api';
-import PoliticianCard from '@/components/PoliticianCard';
-import HomeSearch from '@/components/HomeSearch';
+import HomeContent from '@/components/HomeContent';
 
-export default async function HomePage() {
-  let leaderboard;
-  let filters;
-
-  try {
-    [leaderboard, filters] = await Promise.all([
-      getLeaderboard({ limit: 10 }),
-      getFilters(),
-    ]);
-  } catch {
-    return (
-      <div className="empty-state">
-        <p>Unable to reach the API. Please ensure the backend is running.</p>
-      </div>
-    );
-  }
-
-  const topMPs = leaderboard?.results ?? [];
-  const states = filters?.states ?? [];
-  const parties = filters?.parties ?? [];
-
+export default function HomePage() {
   return (
     <div>
       {/* ── Hero ── */}
@@ -47,44 +25,13 @@ export default async function HomePage() {
           }}
         >
           Track how your representatives perform in Parliament. Every score
-          traces back to official records -- attendance, questions, affidavits,
+          traces back to official records — attendance, questions, affidavits,
           and declared criminal cases.
         </p>
-
-        <HomeSearch states={states} parties={parties} />
       </section>
 
-      {/* ── Top 10 ── */}
-      <section style={{ marginTop: '2rem' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: '1rem',
-          }}
-        >
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 600 }}>
-            Top Ranked MPs
-          </h2>
-          <Link
-            href="/leaderboard"
-            style={{ fontSize: '0.8125rem', fontWeight: 500 }}
-          >
-            View full leaderboard
-          </Link>
-        </div>
-
-        <div className="grid-auto">
-          {topMPs.map((p, i) => (
-            <PoliticianCard key={p.id} politician={p} rank={p.rank ?? i + 1} />
-          ))}
-        </div>
-
-        {topMPs.length === 0 && (
-          <p className="empty-state">No leaderboard data available yet.</p>
-        )}
-      </section>
+      {/* Client component handles API calls */}
+      <HomeContent />
 
       {/* ── Quick links ── */}
       <section style={{ marginTop: '3rem' }}>

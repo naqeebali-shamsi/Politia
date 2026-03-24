@@ -3,6 +3,9 @@ import { searchPoliticians, getFilters } from '@/lib/api';
 import PoliticianCard from '@/components/PoliticianCard';
 import SearchControls from './SearchControls';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
 export default async function SearchPage({
   searchParams,
 }: {

@@ -10,12 +10,21 @@ import type {
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { next: { revalidate: 300 } });
-  if (!res.ok) {
-    throw new Error(`API ${res.status}: ${path}`);
+async function get<T>(path: string, revalidate = 300): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      next: { revalidate },
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw new Error(`API ${res.status}: ${path}`);
+    }
+    return res.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json() as Promise<T>;
 }
 
 /* Client-side fetch (no caching directives) */

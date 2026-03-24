@@ -6,6 +6,9 @@ import ScoreBar from '@/components/ScoreBar';
 import ProfileTabs from './ProfileTabs';
 import { fmtScore, scoreColor, breakdownLabel } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
 export default async function PoliticianPage({
   params,
 }: {
