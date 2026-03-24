@@ -284,9 +284,9 @@ def main():
                 )
 
         # Update is_active for winners of latest election
-        conn.execute(text("UPDATE politicians SET is_active = 0"))
+        conn.execute(text("UPDATE politicians SET is_active = false"))
         conn.execute(text("""
-            UPDATE politicians SET is_active = 1, current_party = sub.party,
+            UPDATE politicians SET is_active = true, current_party = sub.party,
                    current_constituency = sub.constituency, current_state = sub.state
             FROM (
                 SELECT er.politician_id, er.party, c.name as constituency, c.state
@@ -309,7 +309,7 @@ def main():
             logger.info(f"  {year}: {count} records, {winners} winners")
 
         total_pols = conn.execute(text("SELECT COUNT(*) FROM politicians")).scalar()
-        active = conn.execute(text("SELECT COUNT(*) FROM politicians WHERE is_active = 1")).scalar()
+        active = conn.execute(text("SELECT COUNT(*) FROM politicians WHERE is_active = true")).scalar()
         total_elec = conn.execute(text("SELECT COUNT(*) FROM election_records")).scalar()
         logger.info(f"  Total: {total_pols} politicians, {active} active, {total_elec} elections")
 
