@@ -71,7 +71,7 @@ class TestParticipationStrategy:
         assert breakdown["attendance"]["score"] <= 100
         assert breakdown["questions"]["score"] <= 100
         assert breakdown["debates"]["score"] <= 100
-        assert breakdown["committees"]["score"] <= 100
+        # committees removed in v2
 
     def test_sub_weights_sum_to_one(self, strategy):
         total = sum(strategy.SUB_WEIGHTS.values())
@@ -126,7 +126,7 @@ class TestDisclosureStrategy:
             "election_count": 1,
         })
         assert 0 < score < 100
-        assert breakdown["affidavit_complete"]["points"] == 30
+        assert breakdown["affidavit_complete"]["points"] == 35  # v2: reweighted after PAN removal
         assert breakdown["assets_declared"]["points"] == 0
 
     def test_election_linkage_capped(self, strategy):
@@ -147,34 +147,30 @@ class TestIntegrityStrategy:
         assert strategy.name == "integrity"
 
     def test_no_cases_full_score(self, strategy):
-        score, breakdown = strategy.compute({"criminal_cases": 0, "serious_criminal_cases": 0})
+        score, breakdown = strategy.compute({"has_disclosure": True, "criminal_cases": 0})
         assert score == 100.0
 
     def test_one_regular_case(self, strategy):
-        score, _ = strategy.compute({"criminal_cases": 1, "serious_criminal_cases": 0})
+        score, _ = strategy.compute({"has_disclosure": True, "criminal_cases": 1})
         assert score == 90.0
 
-    def test_one_serious_case(self, strategy):
-        score, _ = strategy.compute({"criminal_cases": 1, "serious_criminal_cases": 1})
-        # Regular: -10, Serious: -15 = 75
-        assert score == 75.0
+    def test_many_cases_floor_at_minimum(self, strategy):
+        """Score floors at 50 with cap (deduction capped at 50)."""
+        score, _ = strategy.compute({"has_disclosure": True, "criminal_cases": 20})
+        assert score == 50.0  # 100 - min(20*10, 50) = 50
 
-    def test_many_cases_floor_at_zero(self, strategy):
-        """Score should never go below 0."""
-        score, _ = strategy.compute({"criminal_cases": 20, "serious_criminal_cases": 10})
+    def test_missing_data_gives_zero(self, strategy):
+        """v2: no disclosure data = 0 integrity (not 100)."""
+        score, _ = strategy.compute({})
         assert score == 0.0
 
-    def test_missing_data_treated_as_zero_cases(self, strategy):
-        score, _ = strategy.compute({})
-        assert score == 100.0
-
-    def test_none_values(self, strategy):
-        score, _ = strategy.compute({"criminal_cases": None, "serious_criminal_cases": None})
-        assert score == 100.0
+    def test_no_disclosure_flag_gives_zero(self, strategy):
+        score, _ = strategy.compute({"has_disclosure": False})
+        assert score == 0.0
 
     def test_disclaimer_present(self, strategy):
-        """Every integrity score must include the disclaimer about self-declared cases."""
-        _, breakdown = strategy.compute({"criminal_cases": 0})
+        """Integrity scores with disclosure data must include disclaimer."""
+        _, breakdown = strategy.compute({"has_disclosure": True, "criminal_cases": 0})
         assert "disclaimer" in breakdown
         assert "self-declared" in breakdown["disclaimer"].lower()
 
@@ -185,7 +181,7 @@ class TestScoringEngine:
         return ScoringEngine()
 
     def test_engine_creates_with_default_strategies(self, engine):
-        assert engine.VERSION == "v1"
+        assert engine.VERSION == "v2"
         assert len(engine._strategies) == 3
 
     def test_weights_sum_to_one(self, engine):
@@ -210,7 +206,7 @@ class TestScoringEngine:
             baselines={"avg_attendance": 70, "avg_questions": 30, "avg_debates": 15},
         )
         assert result.politician_id == 42
-        assert result.formula_version == "v1"
+        assert result.formula_version == "v2"
         assert result.is_current is True
         assert 0 <= result.overall_score <= 100
         assert result.computed_at is not None
@@ -241,12 +237,12 @@ class TestScoringEngine:
             disclosure_data={},
             integrity_data={},
         )
-        # Participation=0, Disclosure=0, Integrity=100 (no cases)
-        # Overall = 0*0.6 + 0*0.25 + 100*0.15 = 15.0
+        # v2: Participation=0, Disclosure=0, Integrity=0 (no data = no score)
+        # Overall = 0*0.6 + 0*0.25 + 0*0.15 = 0.0
         assert result.participation_score == 0.0
         assert result.disclosure_score == 0.0
-        assert result.integrity_risk_adjustment == 100.0
-        assert abs(result.overall_score - 15.0) < 0.1
+        assert result.integrity_risk_adjustment == 0.0
+        assert result.overall_score == 0.0
 
     def test_breakdowns_included(self, engine):
         result = engine.compute_score(
@@ -264,23 +260,22 @@ class TestScoringEngine:
         result = engine.compute_score(
             politician_id=1,
             participation_data={"attendance_percentage": 100, "questions_asked": 100,
-                                "debates_participated": 50, "committee_memberships": 4},
+                                "debates_participated": 50},
             disclosure_data={"affidavit_complete": True, "total_assets": 10_000_000,
-                             "total_liabilities": 100_000, "pan_declared": True,
-                             "election_count": 5},
-            integrity_data={"criminal_cases": 0, "serious_criminal_cases": 0},
+                             "total_liabilities": 100_000, "election_count": 5},
+            integrity_data={"has_disclosure": True, "criminal_cases": 0},
             baselines={"avg_attendance": 70, "avg_questions": 30, "avg_debates": 15},
         )
-        assert result.overall_score > 85
+        assert result.overall_score >= 85
 
     def test_worst_case_mp(self, engine):
         """An MP with worst stats should score very low."""
         result = engine.compute_score(
             politician_id=1,
             participation_data={"attendance_percentage": 0, "questions_asked": 0,
-                                "debates_participated": 0, "committee_memberships": 0},
+                                "debates_participated": 0},
             disclosure_data={},
-            integrity_data={"criminal_cases": 10, "serious_criminal_cases": 5},
+            integrity_data={"has_disclosure": True, "criminal_cases": 10},
             baselines={"avg_attendance": 70, "avg_questions": 30, "avg_debates": 15},
         )
-        assert result.overall_score < 5
+        assert result.overall_score < 10

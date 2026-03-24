@@ -3,16 +3,16 @@ from app.infrastructure.scoring.strategies.base import ScoringStrategy
 
 class ParticipationStrategy(ScoringStrategy):
     """
-    Participation Score (60% weight)
-    Measures visible parliamentary activity: attendance, questions, debates, committees.
+    Participation Score (60% weight) — v2
+    Measures visible parliamentary activity: attendance, questions, debates.
     Normalized against chamber/session baselines.
+    Committees removed (always 0 in data), PAN removed from disclosure.
     """
 
     SUB_WEIGHTS = {
-        "attendance": 0.35,
-        "questions": 0.25,
-        "debates": 0.25,
-        "committees": 0.15,
+        "attendance": 0.40,
+        "questions": 0.30,
+        "debates": 0.30,
     }
 
     @property
@@ -59,20 +59,11 @@ class ParticipationStrategy(ScoringStrategy):
             "score": round(d_score, 1),
         }
 
-        # Committees: binary + count bonus
-        committees = data.get("committee_memberships", 0) or 0
-        c_score = min(committees * 25, 100)
-        breakdown["committees"] = {
-            "raw": committees,
-            "score": c_score,
-        }
-
         # Weighted sum
         total = (
             breakdown["attendance"]["score"] * self.SUB_WEIGHTS["attendance"]
             + breakdown["questions"]["score"] * self.SUB_WEIGHTS["questions"]
             + breakdown["debates"]["score"] * self.SUB_WEIGHTS["debates"]
-            + breakdown["committees"]["score"] * self.SUB_WEIGHTS["committees"]
         )
 
         breakdown["total"] = round(total, 2)

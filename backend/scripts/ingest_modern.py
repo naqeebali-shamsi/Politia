@@ -70,6 +70,28 @@ def read_2024_opencity(path: Path) -> list[dict]:
     return rows
 
 
+def read_2019_eci(path: Path) -> list[dict]:
+    """Read pratapvardhan 2019 ECI-scraped CSV."""
+    rows = []
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            name = (row.get("Candidate") or "").strip().upper()
+            party = (row.get("Party") or "").strip()
+            total_votes = row.get("Total Votes") or "0"
+            votes_str = str(total_votes).replace(",", "").strip()
+            votes = int(votes_str) if votes_str.isdigit() else 0
+            state = (row.get("State") or "").strip().upper()
+            constituency = (row.get("Constituency") or "").strip().upper()
+            if name and constituency:
+                rows.append({
+                    "year": 2019, "name": clean_name_for_storage(name),
+                    "party": party, "votes": votes,
+                    "state": normalize_state(state),
+                    "constituency": constituency,
+                })
+    return rows
+
+
 def determine_winners(rows: list[dict]) -> list[dict]:
     """Mark position=1 for the candidate with most votes per constituency per year."""
     from collections import defaultdict
@@ -123,6 +145,13 @@ def main():
         rows_2014 = read_2014_eci(path_2014)
         logger.info(f"Loaded {len(rows_2014)} rows from 2014 ECI data")
         all_rows.extend(rows_2014)
+
+    # 2019 data
+    path_2019 = DATA_ROOT / "lok-sabha-2019" / "eci-2019.csv"
+    if path_2019.exists():
+        rows_2019 = read_2019_eci(path_2019)
+        logger.info(f"Loaded {len(rows_2019)} rows from 2019 ECI data")
+        all_rows.extend(rows_2019)
 
     # 2024 data
     path_2024 = DATA_ROOT / "election-2024" / "results-2024.csv"

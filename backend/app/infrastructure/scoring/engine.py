@@ -14,7 +14,7 @@ class ScoringEngine:
     Formula versioning ensures reproducibility.
     """
 
-    VERSION = "v1"
+    VERSION = "v2"
 
     def __init__(self, strategies: list[ScoringStrategy] | None = None):
         self._strategies = strategies or [
