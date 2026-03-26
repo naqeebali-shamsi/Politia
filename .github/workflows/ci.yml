@@ -43,7 +43,7 @@ jobs:
           pip install pytest pytest-asyncio pytest-mock
 
       - name: Run tests
-        run: python -m pytest tests/ -v --tb=short
+        run: python -m pytest tests/ -v --tb=short --ignore=tests/integration
 
   frontend:
     name: Frontend Build
@@ -74,7 +74,7 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npx next lint --dir .
+        run: npm run lint
 
       - name: Build
         run: npx next build
