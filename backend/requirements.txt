@@ -24,5 +24,9 @@ pdfplumber>=0.11.0
 duckdb>=1.2.0
 polars>=1.0.0
 
+# Semantic search
+sentence-transformers>=3.0.0
+pgvector>=0.3.0
+
 # Utilities
 python-dotenv>=1.0.0

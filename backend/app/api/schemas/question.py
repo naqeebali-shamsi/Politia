@@ -30,6 +30,24 @@ class TermStatItem(BaseModel):
     count: int
 
 
+class SemanticSearchItem(BaseModel):
+    id: int
+    politician_id: int
+    term_number: int | None = None
+    question_date: date | None = None
+    ministry: str | None = None
+    question_type: str | None = None
+    question_title: str | None = None
+    source_url: str | None = None
+    similarity: float
+
+
+class SemanticSearchResponse(BaseModel):
+    query: str
+    results: list[SemanticSearchItem]
+    total: int
+
+
 class QuestionStatsResponse(BaseModel):
     by_ministry: list[MinistryStatItem]
     by_term: list[TermStatItem]
