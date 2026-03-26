@@ -1,0 +1,28 @@
+language: en
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  path_instructions:
+    - path: "backend/app/domain/**"
+      instructions: "This is the domain layer. No framework imports allowed. Pure Python dataclasses and abstract interfaces only."
+    - path: "backend/app/infrastructure/**"
+      instructions: "Infrastructure layer. Check for SQL injection via ilike patterns, proper error handling, and flush vs commit semantics."
+    - path: "backend/app/api/**"
+      instructions: "API layer. Verify Pydantic schemas match response data, check for proper error codes, and ensure CORS is configured."
+    - path: "backend/app/infrastructure/scoring/**"
+      instructions: "Scoring engine. Any formula changes MUST bump the VERSION string. Verify weights sum to 1.0. Check for division by zero."
+    - path: "backend/app/infrastructure/ingestion/**"
+      instructions: "Data ingestion. Check entity resolution logic for over-merging. Verify temporal plausibility. Common Indian names need strict constituency matching."
+    - path: "frontend/src/**"
+      instructions: "Frontend. No Tailwind (use CSS Modules). Server components by default. No emojis unless explicitly requested. Political neutrality in all copy."
+    - path: "backend/tests/**"
+      instructions: "Tests. TDD is mandatory. Verify edge cases: zero data, None values, empty lists. Check that tests use fakes not real DB."
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true
