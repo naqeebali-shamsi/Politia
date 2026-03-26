@@ -27,9 +27,9 @@ def _load_party_performance() -> list[dict]:
     global _party_perf_cache
     if _party_perf_cache is None:
         try:
-            import pandas as pd
-            df = pd.read_parquet(_GOLD_DIR / "party_performance.parquet")
-            _party_perf_cache = df.to_dict(orient="records")
+            import polars as pl
+            df = pl.read_parquet(_GOLD_DIR / "party_performance.parquet")
+            _party_perf_cache = df.to_dicts()
         except Exception:
             _party_perf_cache = []
     return _party_perf_cache
@@ -39,9 +39,9 @@ def _load_wealth_trends() -> list[dict]:
     global _wealth_trends_cache
     if _wealth_trends_cache is None:
         try:
-            import pandas as pd
-            df = pd.read_parquet(_GOLD_DIR / "wealth_trends.parquet")
-            _wealth_trends_cache = df.to_dict(orient="records")
+            import polars as pl
+            df = pl.read_parquet(_GOLD_DIR / "wealth_trends.parquet")
+            _wealth_trends_cache = df.to_dicts()
         except Exception:
             _wealth_trends_cache = []
     return _wealth_trends_cache
