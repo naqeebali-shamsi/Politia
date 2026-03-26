@@ -700,6 +700,65 @@ input, select {
   font-weight: 700;
 }
 
+/* ── Search Autocomplete ── */
+.search-autocomplete {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  list-style: none;
+  padding: 0.25rem 0;
+  z-index: 200;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.search-dropdown-item {
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.search-dropdown-item:hover,
+.search-dropdown-item-active {
+  background: var(--bg-muted);
+}
+
+.search-dropdown-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.search-dropdown-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.search-dropdown-footer {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  border-top: 1px solid var(--border-light);
+  margin-top: 0.25rem;
+}
+
+.search-dropdown-footer:hover {
+  background: var(--accent-light);
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .page-container {
