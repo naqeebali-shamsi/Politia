@@ -96,8 +96,8 @@ export default async function PoliticianPage({
             {data.full_name}
           </h1>
           <div style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-            {data.party} &middot; {data.state} &middot; {data.chamber}
-            {data.constituency ? ` &middot; ${data.constituency}` : ''}
+            {data.party} · {data.state} · {data.chamber}
+            {data.constituency ? ` · ${data.constituency}` : ''}
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.8125rem' }}>
             {data.gender && (

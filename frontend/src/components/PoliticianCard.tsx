@@ -65,8 +65,8 @@ export default function PoliticianCard({
             {p.full_name}
           </div>
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.125rem' }}>
-            {p.party} &middot; {p.state}
-            {p.constituency ? ` &middot; ${p.constituency}` : ''}
+            {p.party} · {p.state}
+            {p.constituency ? ` · ${p.constituency}` : ''}
           </div>
         </div>
         <ScoreBadge score={p.score} />

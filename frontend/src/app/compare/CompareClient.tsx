@@ -122,7 +122,7 @@ export default function CompareClient({ initialIds }: { initialIds: number[] }) 
                 >
                   <span style={{ fontWeight: 500 }}>{p.full_name}</span>
                   <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem' }}>
-                    {p.party} &middot; {p.state}
+                    {p.party} · {p.state}
                   </span>
                   {ids.includes(p.id) && (
                     <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
@@ -214,7 +214,7 @@ export default function CompareClient({ initialIds }: { initialIds: number[] }) 
                     marginBottom: '0.75rem',
                   }}
                 >
-                  {p.party} &middot; {p.state}
+                  {p.party} · {p.state}
                 </div>
                 <ScoreBadge score={p.scores?.overall} large />
               </div>
