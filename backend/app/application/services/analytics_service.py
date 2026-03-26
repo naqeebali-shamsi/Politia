@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 # Pre-compute paths relative to the backend root
-_BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 _GOLD_DIR = _BACKEND_ROOT / "lakehouse" / "gold"
 _GEOJSON_DIR = _BACKEND_ROOT / "data" / "geojson"
 
