@@ -30,6 +30,26 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok", "version": settings.app_version}
 
+    @app.get("/health/data")
+    def health_data():
+        """Debug endpoint: check data file availability."""
+        from pathlib import Path
+        from app.application.services.analytics_service import (
+            _BACKEND_ROOT, _GOLD_DIR, _GEOJSON_DIR,
+        )
+        gold_files = list(_GOLD_DIR.glob("*")) if _GOLD_DIR.exists() else []
+        geojson_files = list(_GEOJSON_DIR.glob("*")) if _GEOJSON_DIR.exists() else []
+        return {
+            "backend_root": str(_BACKEND_ROOT),
+            "gold_dir": str(_GOLD_DIR),
+            "gold_exists": _GOLD_DIR.exists(),
+            "gold_files": [f.name for f in gold_files],
+            "geojson_dir": str(_GEOJSON_DIR),
+            "geojson_exists": _GEOJSON_DIR.exists(),
+            "geojson_files": [f.name for f in geojson_files],
+            "cwd": str(Path.cwd()),
+        }
+
     return app
 
 

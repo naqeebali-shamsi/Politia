@@ -1,11 +1,27 @@
 import json
+import logging
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
 
-# Pre-compute paths relative to the backend root
-_BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+
+def _find_backend_root() -> Path:
+    """Walk up from this file until we find the directory containing lakehouse/."""
+    current = Path(__file__).resolve().parent
+    for _ in range(10):
+        if (current / "lakehouse").is_dir():
+            return current
+        current = current.parent
+    # Fallback: assume 4 levels up from this file
+    return Path(__file__).resolve().parent.parent.parent.parent
+
+
+_BACKEND_ROOT = _find_backend_root()
 _GOLD_DIR = _BACKEND_ROOT / "lakehouse" / "gold"
 _GEOJSON_DIR = _BACKEND_ROOT / "data" / "geojson"
+
+logger.info(f"Analytics data root: {_BACKEND_ROOT}")
+logger.info(f"Gold dir exists: {_GOLD_DIR.exists()}, GeoJSON dir exists: {_GEOJSON_DIR.exists()}")
 
 # Cache loaded data in module-level singletons (loaded once at first request)
 _anomalies_cache: dict | None = None
@@ -28,9 +44,13 @@ def _load_party_performance() -> list[dict]:
     if _party_perf_cache is None:
         try:
             import polars as pl
-            df = pl.read_parquet(_GOLD_DIR / "party_performance.parquet")
+            path = _GOLD_DIR / "party_performance.parquet"
+            logger.info(f"Loading party performance from {path} (exists={path.exists()})")
+            df = pl.read_parquet(path)
             _party_perf_cache = df.to_dicts()
-        except Exception:
+            logger.info(f"Loaded {len(_party_perf_cache)} party performance records")
+        except Exception as e:
+            logger.error(f"Failed to load party performance: {e}")
             _party_perf_cache = []
     return _party_perf_cache
 
@@ -40,9 +60,13 @@ def _load_wealth_trends() -> list[dict]:
     if _wealth_trends_cache is None:
         try:
             import polars as pl
-            df = pl.read_parquet(_GOLD_DIR / "wealth_trends.parquet")
+            path = _GOLD_DIR / "wealth_trends.parquet"
+            logger.info(f"Loading wealth trends from {path} (exists={path.exists()})")
+            df = pl.read_parquet(path)
             _wealth_trends_cache = df.to_dicts()
-        except Exception:
+            logger.info(f"Loaded {len(_wealth_trends_cache)} wealth trend records")
+        except Exception as e:
+            logger.error(f"Failed to load wealth trends: {e}")
             _wealth_trends_cache = []
     return _wealth_trends_cache
 
