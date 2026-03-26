@@ -1,0 +1,10 @@
+# Parquet data files (generated, not committed)
+bronze/*.parquet
+silver/*.parquet
+silver/**/*.parquet
+gold/*.parquet
+
+# Keep the directory structure
+!bronze/.gitkeep
+!silver/.gitkeep
+!gold/.gitkeep

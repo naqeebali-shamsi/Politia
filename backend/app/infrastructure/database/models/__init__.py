@@ -6,6 +6,7 @@ from app.infrastructure.database.models.activity_model import ActivityModel
 from app.infrastructure.database.models.disclosure_model import DisclosureModel
 from app.infrastructure.database.models.score_model import ScoreModel
 from app.infrastructure.database.models.source_model import SourceModel
+from app.infrastructure.database.models.question_model import QuestionModel
 
 __all__ = [
     "PoliticianModel",
@@ -16,4 +17,5 @@ __all__ = [
     "DisclosureModel",
     "ScoreModel",
     "SourceModel",
+    "QuestionModel",
 ]

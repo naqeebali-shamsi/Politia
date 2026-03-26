@@ -45,6 +45,7 @@ class PoliticianModel(Base):
     activities = relationship("ActivityModel", back_populates="politician", lazy="noload")
     disclosures = relationship("DisclosureModel", back_populates="politician", lazy="noload")
     elections = relationship("ElectionModel", back_populates="politician", lazy="noload")
+    questions = relationship("QuestionModel", back_populates="politician", lazy="noload")
 
     __table_args__ = (
         Index("ix_politicians_state_party", "current_state", "current_party"),

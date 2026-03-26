@@ -17,5 +17,5 @@ class ConstituencyModel(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     __table_args__ = (
-        Index("ix_constituency_name_state", "name", "state", unique=True),
+        Index("ix_constituency_name_state_chamber", "name", "state", "chamber", unique=True),
     )
