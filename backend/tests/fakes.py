@@ -10,6 +10,7 @@ from app.domain.entities.disclosure import DisclosureRecord
 from app.domain.entities.election import ElectionRecord
 from app.domain.entities.constituency import Constituency
 from app.domain.entities.source import SourceRecord
+from app.domain.entities.question import QuestionRecord
 from app.domain.interfaces.politician_repository import PoliticianRepository
 from app.domain.interfaces.score_repository import ScoreRepository
 from app.domain.interfaces.activity_repository import ActivityRepository
@@ -17,6 +18,7 @@ from app.domain.interfaces.disclosure_repository import DisclosureRepository
 from app.domain.interfaces.election_repository import ElectionRepository
 from app.domain.interfaces.constituency_repository import ConstituencyRepository
 from app.domain.interfaces.source_repository import SourceRepository
+from app.domain.interfaces.question_repository import QuestionRepository
 
 
 class FakePoliticianRepository(PoliticianRepository):
@@ -288,4 +290,77 @@ class FakeElectionRepository(ElectionRepository):
         return sorted(results, key=lambda e: e.election_year, reverse=True)
 
     def bulk_create(self, records: list[ElectionRecord]) -> list[ElectionRecord]:
+        return [self.create(r) for r in records]
+
+
+class FakeQuestionRepository(QuestionRepository):
+    def __init__(self):
+        self._store: dict[int, QuestionRecord] = {}
+        self._next_id = 1
+
+    def get_by_id(self, entity_id: int) -> QuestionRecord | None:
+        return self._store.get(entity_id)
+
+    def get_all(self, offset: int = 0, limit: int = 20) -> list[QuestionRecord]:
+        return list(self._store.values())[offset:offset + limit]
+
+    def create(self, entity: QuestionRecord) -> QuestionRecord:
+        entity.id = self._next_id
+        self._next_id += 1
+        self._store[entity.id] = entity
+        return entity
+
+    def update(self, entity: QuestionRecord) -> QuestionRecord:
+        self._store[entity.id] = entity
+        return entity
+
+    def delete(self, entity_id: int) -> bool:
+        return self._store.pop(entity_id, None) is not None
+
+    def count(self) -> int:
+        return len(self._store)
+
+    def search(
+        self,
+        politician_id: int | None = None,
+        ministry: str | None = None,
+        term: int | None = None,
+        query: str | None = None,
+        offset: int = 0,
+        limit: int = 20,
+    ) -> list[QuestionRecord]:
+        results = list(self._store.values())
+        if politician_id is not None:
+            results = [r for r in results if r.politician_id == politician_id]
+        if ministry:
+            results = [r for r in results if ministry.lower() in (r.ministry or "").lower()]
+        if term is not None:
+            results = [r for r in results if r.term_number == term]
+        if query:
+            results = [r for r in results if query.lower() in (r.question_title or "").lower()]
+        return results[offset:offset + limit]
+
+    def search_count(
+        self,
+        politician_id: int | None = None,
+        ministry: str | None = None,
+        term: int | None = None,
+        query: str | None = None,
+    ) -> int:
+        return len(self.search(politician_id, ministry, term, query, 0, 999999))
+
+    def get_stats_by_ministry(self) -> list[dict]:
+        from collections import Counter
+        counts = Counter(r.ministry for r in self._store.values() if r.ministry)
+        return [{"ministry": m, "count": c} for m, c in counts.most_common()]
+
+    def get_stats_by_term(self) -> list[dict]:
+        from collections import Counter
+        counts = Counter(r.term_number for r in self._store.values() if r.term_number)
+        return [{"term_number": t, "count": c} for t, c in sorted(counts.items())]
+
+    def get_distinct_ministries(self) -> list[str]:
+        return sorted({r.ministry for r in self._store.values() if r.ministry})
+
+    def bulk_create(self, records: list[QuestionRecord]) -> list[QuestionRecord]:
         return [self.create(r) for r in records]

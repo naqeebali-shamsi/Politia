@@ -3,12 +3,15 @@ Factory functions for creating test domain entities with sensible defaults.
 """
 from datetime import datetime, timezone
 
+from datetime import date
+
 from app.domain.entities.politician import Politician
 from app.domain.entities.score import ScoreRecord
 from app.domain.entities.activity import ActivityRecord
 from app.domain.entities.disclosure import DisclosureRecord
 from app.domain.entities.election import ElectionRecord
 from app.domain.entities.constituency import Constituency
+from app.domain.entities.question import QuestionRecord
 
 
 def make_politician(
@@ -123,4 +126,24 @@ def make_constituency(
     return Constituency(
         id=id, name=name, state=state, chamber=chamber,
         constituency_type=constituency_type, **kwargs,
+    )
+
+
+def make_question(
+    id: int | None = None,
+    politician_id: int = 1,
+    term_number: int = 17,
+    question_date: date | None = None,
+    ministry: str = "Ministry of Finance",
+    question_type: str = "Starred",
+    question_title: str = "Status of bank NPA resolution",
+    source_url: str | None = None,
+    **kwargs,
+) -> QuestionRecord:
+    return QuestionRecord(
+        id=id, politician_id=politician_id, term_number=term_number,
+        question_date=question_date or date(2023, 7, 15),
+        ministry=ministry, question_type=question_type,
+        question_title=question_title, source_url=source_url,
+        **kwargs,
     )

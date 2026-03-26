@@ -9,6 +9,7 @@ from app.infrastructure.database.repositories.disclosure_repository import SqlDi
 from app.infrastructure.database.repositories.election_repository import SqlElectionRepository
 from app.infrastructure.database.repositories.constituency_repository import SqlConstituencyRepository
 from app.infrastructure.database.repositories.source_repository import SqlSourceRepository
+from app.infrastructure.database.repositories.question_repository import SqlQuestionRepository
 from app.domain.interfaces.politician_repository import PoliticianRepository
 from app.domain.interfaces.score_repository import ScoreRepository
 from app.domain.interfaces.activity_repository import ActivityRepository
@@ -16,9 +17,12 @@ from app.domain.interfaces.disclosure_repository import DisclosureRepository
 from app.domain.interfaces.election_repository import ElectionRepository
 from app.domain.interfaces.constituency_repository import ConstituencyRepository
 from app.domain.interfaces.source_repository import SourceRepository
+from app.domain.interfaces.question_repository import QuestionRepository
 from app.application.services.politician_service import PoliticianService
 from app.application.services.leaderboard_service import LeaderboardService
 from app.application.services.comparison_service import ComparisonService
+from app.application.services.question_service import QuestionService
+from app.application.services.analytics_service import AnalyticsService
 
 
 # Repository providers — swap implementations here without touching services
@@ -51,6 +55,10 @@ def get_source_repo(db: Session = Depends(get_db)) -> SourceRepository:
     return SqlSourceRepository(db)
 
 
+def get_question_repo(db: Session = Depends(get_db)) -> QuestionRepository:
+    return SqlQuestionRepository(db)
+
+
 # Service providers
 
 def get_politician_service(
@@ -77,3 +85,13 @@ def get_comparison_service(
     disclosure_repo: DisclosureRepository = Depends(get_disclosure_repo),
 ) -> ComparisonService:
     return ComparisonService(politician_repo, score_repo, activity_repo, disclosure_repo)
+
+
+def get_question_service(
+    question_repo: QuestionRepository = Depends(get_question_repo),
+) -> QuestionService:
+    return QuestionService(question_repo)
+
+
+def get_analytics_service() -> AnalyticsService:
+    return AnalyticsService()

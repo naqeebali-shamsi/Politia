@@ -6,6 +6,7 @@ from tests.fakes import (
     FakeActivityRepository,
     FakeDisclosureRepository,
     FakeElectionRepository,
+    FakeQuestionRepository,
 )
 from tests.factories import (
     make_politician,
@@ -13,6 +14,7 @@ from tests.factories import (
     make_activity,
     make_disclosure,
     make_election,
+    make_question,
 )
 
 
@@ -41,6 +43,11 @@ def disclosure_repo():
 @pytest.fixture
 def election_repo():
     return FakeElectionRepository()
+
+
+@pytest.fixture
+def question_repo():
+    return FakeQuestionRepository()
 
 
 # -- Pre-populated fixtures --
