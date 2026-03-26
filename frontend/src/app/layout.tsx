@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import TopBanner from '@/components/TopBanner';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -16,6 +17,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <TopBanner />
+
         <header className="site-header">
           <div className="site-header-inner">
             <Link href="/" className="site-logo">
@@ -26,6 +29,7 @@ export default function RootLayout({
               <Link href="/compare">Compare</Link>
               <Link href="/methodology">Methodology</Link>
               <Link href="/blog">Blog</Link>
+              <Link href="/contribute" className="site-nav-contribute">Contribute</Link>
             </nav>
           </div>
         </header>
@@ -39,6 +43,8 @@ export default function RootLayout({
           </p>
           <p style={{ marginTop: '0.5rem' }}>
             <Link href="/methodology">Methodology</Link>
+            {' · '}
+            <Link href="/contribute">Contribute</Link>
             {' · '}
             Data may be incomplete or delayed. This is not an endorsement or
             condemnation of any politician.

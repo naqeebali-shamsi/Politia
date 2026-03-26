@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import HomeContent from '@/components/HomeContent';
+import ContributeSection from '@/components/ContributeSection';
 
 export default function HomePage() {
   return (
@@ -84,6 +85,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Contribute ── */}
+      <ContributeSection />
     </div>
   );
 }
