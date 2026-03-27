@@ -145,6 +145,10 @@ class FakeScoreRepository(ScoreRepository):
         current.sort(key=lambda s: getattr(s, sort_by, 0), reverse=True)
         return [(s.politician_id, s) for s in current[offset:offset + limit]]
 
+    def count_leaderboard(self, chamber: str | None = None, state: str | None = None,
+                          party: str | None = None) -> int:
+        return len([s for s in self._store.values() if s.is_current])
+
     def get_scores_for_politicians(self, politician_ids: list[int]) -> dict[int, ScoreRecord]:
         result = {}
         for s in self._store.values():
