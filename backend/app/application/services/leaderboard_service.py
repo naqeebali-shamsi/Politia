@@ -27,6 +27,10 @@ class LeaderboardService:
         if sort_by not in allowed_sort:
             sort_by = "overall_score"
 
+        total = self._scores.count_leaderboard(
+            chamber=chamber, state=state, party=party,
+        )
+
         entries = self._scores.get_leaderboard(
             chamber=chamber, state=state, party=party,
             sort_by=sort_by, offset=offset, limit=limit,
@@ -56,4 +60,4 @@ class LeaderboardService:
                 "integrity_risk_adjustment": score.integrity_risk_adjustment,
             })
 
-        return {"results": results, "offset": offset, "limit": limit}
+        return {"results": results, "total": total, "offset": offset, "limit": limit}
