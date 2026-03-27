@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database
-    database_url: str = "postgresql+psycopg2://localhost:5432/politia"
+    database_url: str = ""
     database_echo: bool = False
     database_pool_size: int = 5
     database_max_overflow: int = 10

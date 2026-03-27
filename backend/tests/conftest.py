@@ -26,8 +26,10 @@ def politician_repo():
 
 
 @pytest.fixture
-def score_repo():
-    return FakeScoreRepository()
+def score_repo(politician_repo):
+    repo = FakeScoreRepository()
+    repo.bind_politician_repo(politician_repo)
+    return repo
 
 
 @pytest.fixture

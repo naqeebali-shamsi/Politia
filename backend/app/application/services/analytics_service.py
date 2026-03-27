@@ -29,13 +29,22 @@ _party_perf_cache: list | None = None
 _wealth_trends_cache: list | None = None
 _geojson_cache: dict | None = None
 
+# Accumulates human-readable error messages whenever a data source fails to load.
+# Callers can inspect this to distinguish "genuinely empty dataset" from "load failure".
+_data_load_errors: list[str] = []
+
 
 def _load_anomalies() -> dict:
     global _anomalies_cache
     if _anomalies_cache is None:
         path = _GOLD_DIR / "wealth_anomalies.json"
-        with open(path, encoding="utf-8") as f:
-            _anomalies_cache = json.load(f)
+        try:
+            with open(path, encoding="utf-8") as f:
+                _anomalies_cache = json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load anomalies data from {path}: {e}")
+            _data_load_errors.append(f"Anomalies data unavailable: {e}")
+            _anomalies_cache = {}
     return _anomalies_cache
 
 
@@ -50,7 +59,8 @@ def _load_party_performance() -> list[dict]:
             _party_perf_cache = df.to_dicts()
             logger.info(f"Loaded {len(_party_perf_cache)} party performance records")
         except Exception as e:
-            logger.error(f"Failed to load party performance: {e}")
+            logger.warning(f"Failed to load party performance: {e}")
+            _data_load_errors.append(f"Party performance data unavailable: {e}")
             _party_perf_cache = []
     return _party_perf_cache
 
@@ -66,7 +76,8 @@ def _load_wealth_trends() -> list[dict]:
             _wealth_trends_cache = df.to_dicts()
             logger.info(f"Loaded {len(_wealth_trends_cache)} wealth trend records")
         except Exception as e:
-            logger.error(f"Failed to load wealth trends: {e}")
+            logger.warning(f"Failed to load wealth trends: {e}")
+            _data_load_errors.append(f"Wealth trends data unavailable: {e}")
             _wealth_trends_cache = []
     return _wealth_trends_cache
 
@@ -96,6 +107,21 @@ def _load_geojson() -> dict:
     return _geojson_cache
 
 
+def get_data_health() -> dict:
+    """
+    Return a health snapshot for all analytics data sources.
+
+    ``healthy`` is True only when no load errors have been recorded.
+    ``errors`` lists each failure message accumulated since process start.
+    Call this after at least one request has been served so the caches have
+    had a chance to populate (loaders are lazy).
+    """
+    return {
+        "healthy": len(_data_load_errors) == 0,
+        "errors": list(_data_load_errors),
+    }
+
+
 class AnalyticsService:
     """Serves pre-computed analytics from the gold layer (JSON/Parquet files)."""
 
@@ -118,12 +144,15 @@ class AnalyticsService:
             anomalies = [a for a in anomalies if a.get("state", "").upper() == state.upper()]
 
         total = len(anomalies)
-        return {
+        result: dict = {
             "anomalies": anomalies[offset: offset + limit],
             "total": total,
             "offset": offset,
             "limit": limit,
         }
+        if _data_load_errors:
+            result["warning"] = "Some analytics data failed to load: " + "; ".join(_data_load_errors)
+        return result
 
     def get_constituency_geojson(self, constituency_id: str) -> dict | None:
         index = _load_geojson()
@@ -146,14 +175,20 @@ class AnalyticsService:
         if year:
             filtered = [r for r in filtered if r.get("election_year") == year]
 
-        return {
+        result: dict = {
             "trends": filtered,
             "total": len(filtered),
         }
+        if _data_load_errors:
+            result["warning"] = "Some analytics data failed to load: " + "; ".join(_data_load_errors)
+        return result
 
     def get_crorepati_trends(self) -> dict:
         records = _load_wealth_trends()
-        return {
+        result: dict = {
             "trends": records,
             "total": len(records),
         }
+        if _data_load_errors:
+            result["warning"] = "Some analytics data failed to load: " + "; ".join(_data_load_errors)
+        return result

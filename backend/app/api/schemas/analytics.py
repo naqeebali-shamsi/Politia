@@ -19,6 +19,7 @@ class AnomaliesResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 50
+    warning: str | None = None
 
 
 class PartyTrendItem(BaseModel):
@@ -34,6 +35,7 @@ class PartyTrendItem(BaseModel):
 class PartyTrendsResponse(BaseModel):
     trends: list[PartyTrendItem]
     total: int
+    warning: str | None = None
 
 
 class CrorepatiTrendItem(BaseModel):
@@ -51,3 +53,4 @@ class CrorepatiTrendItem(BaseModel):
 class CrorepatiTrendsResponse(BaseModel):
     trends: list[CrorepatiTrendItem]
     total: int
+    warning: str | None = None

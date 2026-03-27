@@ -103,6 +103,43 @@ class FakeScoreRepository(ScoreRepository):
     def __init__(self):
         self._store: dict[int, ScoreRecord] = {}
         self._next_id = 1
+        # Optional politician repository reference so that leaderboard filters
+        # (chamber, state, party) can be applied by looking up politician attributes,
+        # mirroring the SQL JOIN in SqlScoreRepository.
+        self._politician_repo: PoliticianRepository | None = None
+
+    def bind_politician_repo(self, politician_repo: PoliticianRepository) -> None:
+        """Associate a politician repository so leaderboard filters work."""
+        self._politician_repo = politician_repo
+
+    def _politician_matches(
+        self,
+        politician_id: int,
+        chamber: str | None,
+        state: str | None,
+        party: str | None,
+    ) -> bool:
+        """Return True when the politician satisfies all active filter criteria.
+
+        If no filters are passed this is always True.  When filters are requested
+        but no politician repo has been bound (e.g. low-level repo unit tests that
+        don't need politician lookup) the filters are silently skipped so those
+        tests continue to pass.
+        """
+        if not (chamber or state or party):
+            return True
+        if self._politician_repo is None:
+            return True
+        p = self._politician_repo.get_by_id(politician_id)
+        if p is None:
+            return False
+        if chamber and p.current_chamber != chamber:
+            return False
+        if state and p.current_state != state:
+            return False
+        if party and p.current_party != party:
+            return False
+        return True
 
     def get_by_id(self, entity_id: int) -> ScoreRecord | None:
         return self._store.get(entity_id)
@@ -141,13 +178,27 @@ class FakeScoreRepository(ScoreRepository):
     def get_leaderboard(self, chamber: str | None = None, state: str | None = None,
                         party: str | None = None, sort_by: str = "overall_score",
                         offset: int = 0, limit: int = 20) -> list[tuple[int, ScoreRecord]]:
-        current = [s for s in self._store.values() if s.is_current]
-        current.sort(key=lambda s: getattr(s, sort_by, 0), reverse=True)
+        _allowed_sort = {
+            "overall_score", "participation_score", "disclosure_score",
+            "integrity_risk_adjustment",
+        }
+        if sort_by not in _allowed_sort:
+            sort_by = "overall_score"
+        current = [
+            s for s in self._store.values()
+            if s.is_current
+            and self._politician_matches(s.politician_id, chamber, state, party)
+        ]
+        current.sort(key=lambda s: getattr(s, sort_by, 0) or 0, reverse=True)
         return [(s.politician_id, s) for s in current[offset:offset + limit]]
 
     def count_leaderboard(self, chamber: str | None = None, state: str | None = None,
                           party: str | None = None) -> int:
-        return len([s for s in self._store.values() if s.is_current])
+        return len([
+            s for s in self._store.values()
+            if s.is_current
+            and self._politician_matches(s.politician_id, chamber, state, party)
+        ])
 
     def get_scores_for_politicians(self, politician_ids: list[int]) -> dict[int, ScoreRecord]:
         result = {}

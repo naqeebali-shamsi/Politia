@@ -103,6 +103,102 @@ class TestLeaderboardService:
         result = service.get_leaderboard(sort_by="invalid_field")
         assert len(result["results"]) > 0
 
+    # -- Filter tests --
+
+    def test_filter_by_chamber_lok_sabha(self, service, sample_politicians, sample_scores):
+        """Only Lok Sabha politicians should appear when chamber filter is applied."""
+        result = service.get_leaderboard(chamber="Lok Sabha")
+        chambers = {r["chamber"] for r in result["results"]}
+        assert chambers == {"Lok Sabha"}
+        # sample_politicians has 3 Lok Sabha members: Modi, Rahul, Mamata
+        assert result["total"] == 3
+
+    def test_filter_by_chamber_rajya_sabha(self, service, sample_politicians, sample_scores):
+        """Only Rajya Sabha politicians should appear when chamber filter is applied."""
+        result = service.get_leaderboard(chamber="Rajya Sabha")
+        chambers = {r["chamber"] for r in result["results"]}
+        assert chambers == {"Rajya Sabha"}
+        # sample_politicians has 2 Rajya Sabha members: Amit Shah, Sonia Gandhi
+        assert result["total"] == 2
+
+    def test_filter_by_state(self, service, sample_politicians, sample_scores):
+        """Only politicians from the given state should be returned."""
+        result = service.get_leaderboard(state="Kerala")
+        names = [r["full_name"] for r in result["results"]]
+        assert names == ["Rahul Gandhi"]
+        assert result["total"] == 1
+
+    def test_filter_by_state_multiple_politicians(self, service, sample_politicians, sample_scores):
+        """Filter by a state with multiple politicians returns all of them."""
+        result = service.get_leaderboard(state="Gujarat")
+        assert result["total"] == 2
+        names = {r["full_name"] for r in result["results"]}
+        assert names == {"Narendra Modi", "Amit Shah"}
+
+    def test_filter_by_party_bjp(self, service, sample_politicians, sample_scores):
+        """Only BJP politicians should appear when party filter is applied."""
+        result = service.get_leaderboard(party="BJP")
+        parties = {r["party"] for r in result["results"]}
+        assert parties == {"BJP"}
+        assert result["total"] == 2
+
+    def test_filter_by_party_inc(self, service, sample_politicians, sample_scores):
+        """Only INC politicians should appear when party filter is applied."""
+        result = service.get_leaderboard(party="INC")
+        parties = {r["party"] for r in result["results"]}
+        assert parties == {"INC"}
+        assert result["total"] == 2
+
+    def test_filter_by_party_no_match(self, service, sample_politicians, sample_scores):
+        """A party with no politicians should return empty results."""
+        result = service.get_leaderboard(party="BSP")
+        assert result["results"] == []
+        assert result["total"] == 0
+
+    def test_filter_chamber_and_party_combined(self, service, sample_politicians, sample_scores):
+        """Combined chamber + party filters should AND the conditions."""
+        result = service.get_leaderboard(chamber="Lok Sabha", party="BJP")
+        # Only Modi is Lok Sabha + BJP
+        assert result["total"] == 1
+        assert result["results"][0]["full_name"] == "Narendra Modi"
+
+    def test_filter_chamber_and_state_combined(self, service, sample_politicians, sample_scores):
+        """Combined chamber + state filters should AND the conditions."""
+        result = service.get_leaderboard(chamber="Rajya Sabha", state="Gujarat")
+        # Only Amit Shah is Rajya Sabha in Gujarat
+        assert result["total"] == 1
+        assert result["results"][0]["full_name"] == "Amit Shah"
+
+    def test_filter_all_three_combined(self, service, sample_politicians, sample_scores):
+        """All three filters applied together should AND all conditions."""
+        result = service.get_leaderboard(chamber="Lok Sabha", state="Kerala", party="INC")
+        assert result["total"] == 1
+        assert result["results"][0]["full_name"] == "Rahul Gandhi"
+
+    def test_count_leaderboard_with_filter(self, service, sample_politicians, sample_scores):
+        """The total field returned must exactly match count_leaderboard."""
+        result_lok = service.get_leaderboard(chamber="Lok Sabha")
+        assert result_lok["total"] == 3
+
+        result_inc = service.get_leaderboard(party="INC")
+        assert result_inc["total"] == 2
+
+    def test_filter_results_are_sorted_by_score(self, service, sample_politicians, sample_scores):
+        """Results within a filtered set must still be sorted descending."""
+        result = service.get_leaderboard(chamber="Lok Sabha")
+        scores = [r["score"] for r in result["results"]]
+        assert scores == sorted(scores, reverse=True)
+
+    def test_filter_respects_pagination(self, service, sample_politicians, sample_scores):
+        """Pagination offsets are applied after filtering."""
+        page1 = service.get_leaderboard(chamber="Lok Sabha", limit=2)
+        page2 = service.get_leaderboard(chamber="Lok Sabha", offset=2, limit=2)
+        assert len(page1["results"]) == 2
+        assert len(page2["results"]) == 1  # 3 total, 2 on page 1 leaves 1
+        names1 = {r["full_name"] for r in page1["results"]}
+        names2 = {r["full_name"] for r in page2["results"]}
+        assert len(names1 & names2) == 0
+
 
 class TestComparisonService:
     @pytest.fixture

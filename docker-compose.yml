@@ -5,8 +5,8 @@ services:
     image: postgres:15
     container_name: politia_postgres
     environment:
-      POSTGRES_USER: politia_user
-      POSTGRES_PASSWORD: politia_password
+      POSTGRES_USER: ${POSTGRES_USER:-politia_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-politia_password}
       POSTGRES_DB: politia_db
     ports:
       - "5432:5432"
