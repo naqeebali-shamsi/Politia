@@ -18,5 +18,6 @@ class LeaderboardEntry(BaseModel):
 
 class LeaderboardResponse(BaseModel):
     results: list[LeaderboardEntry]
+    total: int = 0
     offset: int = 0
     limit: int = 20

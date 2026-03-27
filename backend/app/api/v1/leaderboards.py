@@ -23,6 +23,7 @@ def get_leaderboard(
     )
     return LeaderboardResponse(
         results=[LeaderboardEntry(**r) for r in result["results"]],
+        total=result["total"],
         offset=result["offset"],
         limit=result["limit"],
     )

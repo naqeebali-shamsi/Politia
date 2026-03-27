@@ -131,6 +131,25 @@ class SqlScoreRepository(IScoreRepository):
         models = q.order_by(desc(sort_column)).offset(offset).limit(limit).all()
         return [(m.politician_id, self._to_entity(m)) for m in models]
 
+    def count_leaderboard(
+        self,
+        chamber: str | None = None,
+        state: str | None = None,
+        party: str | None = None,
+    ) -> int:
+        q = (
+            self._db.query(func.count(ScoreModel.id))
+            .join(PoliticianModel, PoliticianModel.id == ScoreModel.politician_id)
+            .filter(ScoreModel.is_current.is_(True))
+        )
+        if chamber:
+            q = q.filter(PoliticianModel.current_chamber == chamber)
+        if state:
+            q = q.filter(PoliticianModel.current_state == state)
+        if party:
+            q = q.filter(PoliticianModel.current_party == party)
+        return q.scalar()
+
     def get_scores_for_politicians(self, politician_ids: list[int]) -> dict[int, ScoreRecord]:
         models = (
             self._db.query(ScoreModel)

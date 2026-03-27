@@ -27,6 +27,16 @@ class ScoreRepository(BaseRepository[ScoreRecord]):
         ...
 
     @abstractmethod
+    def count_leaderboard(
+        self,
+        chamber: str | None = None,
+        state: str | None = None,
+        party: str | None = None,
+    ) -> int:
+        """Count leaderboard entries matching the given filters."""
+        ...
+
+    @abstractmethod
     def get_scores_for_politicians(
         self, politician_ids: list[int]
     ) -> dict[int, ScoreRecord]:
