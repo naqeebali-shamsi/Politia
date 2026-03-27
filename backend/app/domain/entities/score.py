@@ -16,6 +16,6 @@ class ScoreRecord:
     disclosure_breakdown: dict | None = None
     integrity_breakdown: dict | None = None
 
-    formula_version: str = "v1"
+    formula_version: str = "v2"
     computed_at: datetime | None = None
     is_current: bool = True  # Only one current score per politician

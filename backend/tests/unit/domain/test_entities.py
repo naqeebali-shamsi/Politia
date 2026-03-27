@@ -52,7 +52,7 @@ class TestScoreRecord:
         s = ScoreRecord()
         assert s.overall_score == 0.0
         assert s.participation_score == 0.0
-        assert s.formula_version == "v1"
+        assert s.formula_version == "v2"
         assert s.is_current is True
 
     def test_construction_with_breakdowns(self):

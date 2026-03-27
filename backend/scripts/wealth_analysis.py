@@ -16,7 +16,6 @@ Outputs:
 import os
 import sys
 import json
-import sqlite3
 import warnings
 from pathlib import Path
 
@@ -31,7 +30,35 @@ warnings.filterwarnings("ignore")
 # Config
 # ---------------------------------------------------------------------------
 DB_URL = os.environ.get("POLITIA_DATABASE_URL", "sqlite:///./politia_dev.db")
-DB_PATH = DB_URL.replace("sqlite:///", "")
+
+# Detect database type and create an appropriate engine
+if DB_URL.startswith("sqlite"):
+    try:
+        from sqlalchemy import create_engine as _create_engine
+        DB_ENGINE = _create_engine(DB_URL, connect_args={"check_same_thread": False})
+    except ImportError:
+        print(
+            "ERROR: SQLAlchemy is required. Install it with: pip install sqlalchemy",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    DB_IS_SQLITE = True
+elif DB_URL.startswith("postgresql") or DB_URL.startswith("postgres"):
+    try:
+        from sqlalchemy import create_engine as _create_engine
+        DB_ENGINE = _create_engine(DB_URL)
+        DB_IS_SQLITE = False
+    except ImportError:
+        print(
+            "ERROR: SQLAlchemy is required to connect to PostgreSQL. "
+            "Install it with: pip install sqlalchemy psycopg2-binary",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+else:
+    print("ERROR: Unsupported database URL scheme:", repr(DB_URL), file=sys.stderr)
+    print("Set POLITIA_DATABASE_URL to a sqlite:/// or postgresql:// URL.", file=sys.stderr)
+    sys.exit(1)
 GOLD_DIR = Path(__file__).resolve().parent.parent / "lakehouse" / "gold"
 GOLD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -75,30 +102,28 @@ def print_table(df, max_rows=50):
 # ---------------------------------------------------------------------------
 
 def load_data():
-    conn = sqlite3.connect(DB_PATH)
-
-    disclosures = pd.read_sql_query("""
-        SELECT d.id as disclosure_id,
-               d.politician_id,
-               p.full_name,
-               COALESCE(e.party, p.current_party) as party,
-               p.current_state as state,
-               d.election_year,
-               d.total_assets,
-               d.movable_assets,
-               d.immovable_assets,
-               d.total_liabilities,
-               d.criminal_cases,
-               d.serious_criminal_cases
-        FROM disclosure_records d
-        JOIN politicians p ON d.politician_id = p.id
-        LEFT JOIN election_records e
-            ON e.politician_id = d.politician_id
-            AND e.election_year = d.election_year
-        WHERE d.total_assets IS NOT NULL
-          AND d.total_assets > 0
-    """, conn)
-    conn.close()
+    with DB_ENGINE.connect() as conn:
+        disclosures = pd.read_sql_query("""
+            SELECT d.id as disclosure_id,
+                   d.politician_id,
+                   p.full_name,
+                   COALESCE(e.party, p.current_party) as party,
+                   p.current_state as state,
+                   d.election_year,
+                   d.total_assets,
+                   d.movable_assets,
+                   d.immovable_assets,
+                   d.total_liabilities,
+                   d.criminal_cases,
+                   d.serious_criminal_cases
+            FROM disclosure_records d
+            JOIN politicians p ON d.politician_id = p.id
+            LEFT JOIN election_records e
+                ON e.politician_id = d.politician_id
+                AND e.election_year = d.election_year
+            WHERE d.total_assets IS NOT NULL
+              AND d.total_assets > 0
+        """, conn)
 
     # Normalize party names for grouping
     party_map = {
@@ -310,20 +335,19 @@ def suspicious_patterns(df, growth_df):
     results["criminal_rich"] = criminal_rich
 
     # d) Zero-asset declarations in the raw data
-    conn = sqlite3.connect(DB_PATH)
-    zero_assets = pd.read_sql_query("""
-        SELECT d.politician_id, p.full_name,
-               COALESCE(e.party, p.current_party) as party,
-               p.current_state as state,
-               d.election_year, d.total_assets, d.criminal_cases
-        FROM disclosure_records d
-        JOIN politicians p ON d.politician_id = p.id
-        LEFT JOIN election_records e
-            ON e.politician_id = d.politician_id
-            AND e.election_year = d.election_year
-        WHERE (d.total_assets IS NULL OR d.total_assets = 0)
-    """, conn)
-    conn.close()
+    with DB_ENGINE.connect() as conn:
+        zero_assets = pd.read_sql_query("""
+            SELECT d.politician_id, p.full_name,
+                   COALESCE(e.party, p.current_party) as party,
+                   p.current_state as state,
+                   d.election_year, d.total_assets, d.criminal_cases
+            FROM disclosure_records d
+            JOIN politicians p ON d.politician_id = p.id
+            LEFT JOIN election_records e
+                ON e.politician_id = d.politician_id
+                AND e.election_year = d.election_year
+            WHERE (d.total_assets IS NULL OR d.total_assets = 0)
+        """, conn)
     results["zero_assets"] = zero_assets
 
     return results

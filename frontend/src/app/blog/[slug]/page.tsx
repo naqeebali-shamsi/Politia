@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import DOMPurify from 'isomorphic-dompurify';
 import { articles, getArticleBySlug, getRelatedArticles } from '@/lib/blog-data';
 import styles from '../blog.module.css';
 
@@ -76,12 +77,19 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </header>
 
+      {/* Disclaimer banner */}
+      {article.disclaimer && (
+        <div className={styles.disclaimerBanner} role="note">
+          <strong>Note:</strong> {article.disclaimer}
+        </div>
+      )}
+
       {/* Two-column layout */}
       <div className={styles.postLayout}>
         {/* Main content */}
         <article
           className={styles.postContent}
-          dangerouslySetInnerHTML={{ __html: article.content }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }}
         />
 
         {/* Sidebar */}

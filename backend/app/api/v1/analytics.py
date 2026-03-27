@@ -29,6 +29,7 @@ def get_anomalies(
         total=result["total"],
         offset=result["offset"],
         limit=result["limit"],
+        warning=result.get("warning"),
     )
 
 
@@ -53,6 +54,7 @@ def get_party_trends(
     return PartyTrendsResponse(
         trends=[PartyTrendItem(**t) for t in result["trends"]],
         total=result["total"],
+        warning=result.get("warning"),
     )
 
 
@@ -64,4 +66,5 @@ def get_crorepati_trends(
     return CrorepatiTrendsResponse(
         trends=[CrorepatiTrendItem(**t) for t in result["trends"]],
         total=result["total"],
+        warning=result.get("warning"),
     )

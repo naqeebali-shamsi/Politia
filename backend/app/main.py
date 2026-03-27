@@ -8,6 +8,12 @@ from app.api.v1.router import api_router
 def create_app() -> FastAPI:
     settings = get_settings()
 
+    if not settings.database_url:
+        raise RuntimeError(
+            "POLITIA_DATABASE_URL is not set. "
+            "Provide a valid PostgreSQL connection string via the environment variable."
+        )
+
     app = FastAPI(
         title="Politia API",
         description="India Public Accountability Dashboard — transparent, source-backed scorecards for Indian MPs",

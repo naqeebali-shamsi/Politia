@@ -607,3 +607,22 @@
     gap: 0.75rem;
   }
 }
+
+/* ── Disclaimer Banner ── */
+.disclaimerBanner {
+  margin: 1rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface, #f8f8f6);
+  border-left: 3px solid var(--accent, #e07b39);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted, #666);
+  line-height: 1.5;
+}
+
+/* ── Editorial stat marker (hardcoded stat disclosed via tooltip) ── */
+:global(.editorial-stat) {
+  border-bottom: 1px dashed var(--accent, #e07b39);
+  cursor: help;
+  text-decoration: none;
+}

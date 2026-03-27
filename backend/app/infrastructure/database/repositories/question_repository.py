@@ -40,15 +40,22 @@ class SqlQuestionRepository(IQuestionRepository):
             model.id = entity.id
         return model
 
+    @staticmethod
+    def _escape_like(value: str) -> str:
+        """Escape SQL LIKE/ILIKE wildcards to prevent pattern injection."""
+        return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
     def _apply_filters(self, q, politician_id, ministry, term, query):
         if politician_id is not None:
             q = q.filter(QuestionModel.politician_id == politician_id)
         if ministry:
-            q = q.filter(QuestionModel.ministry.ilike(f"%{ministry}%"))
+            escaped = self._escape_like(ministry)
+            q = q.filter(QuestionModel.ministry.ilike(f"%{escaped}%"))
         if term is not None:
             q = q.filter(QuestionModel.term_number == term)
         if query:
-            q = q.filter(QuestionModel.question_title.ilike(f"%{query}%"))
+            escaped = self._escape_like(query)
+            q = q.filter(QuestionModel.question_title.ilike(f"%{escaped}%"))
         return q
 
     # --- BaseRepository ---

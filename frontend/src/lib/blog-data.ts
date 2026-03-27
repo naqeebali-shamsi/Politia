@@ -26,6 +26,7 @@ export interface BlogArticle {
   metadata: BlogMetaItem[];
   toc: BlogTocItem[];
   content: string;
+  disclaimer?: string;
 }
 
 const authors: Record<string, BlogAuthor> = {
@@ -47,6 +48,7 @@ export const articles: BlogArticle[] = [
     readTime: '12 min read',
     heroImage: '',
     author: authors.team,
+    disclaimer: 'Statistics cited in this article are based on historical analysis and may not reflect current database values.',
     metadata: [
       { label: 'Tech Stack', value: 'FastAPI, Next.js 16, PostgreSQL' },
       { label: 'Data Scale', value: '500K+ records' },
@@ -87,7 +89,7 @@ export const articles: BlogArticle[] = [
 
 <section id="the-data-pipeline">
 <h2>The Data Pipeline</h2>
-<p>The key insight that saved us weeks of work: <strong>most of the data we needed already existed as structured downloads</strong>. We did not need to build scrapers for 80% of our requirements.</p>
+<p>The key insight that saved us weeks of work: <strong>most of the data we needed already existed as structured downloads</strong>. We did not need to build scrapers for <span class="editorial-stat" title="Based on historical analysis at time of writing">80%</span> of our requirements.</p>
 <ul>
 <li><strong>Vonter/india-representatives-activity</strong> -- MP performance data from PRS Legislative Research, already in JSON/CSV</li>
 <li><strong>datameet/india-election-data</strong> -- All Lok Sabha election results since independence, clean CSV</li>
@@ -114,7 +116,7 @@ export const articles: BlogArticle[] = [
 
 <section id="the-p0-audit">
 <h2>The P0 Audit</h2>
-<p>We ran a comprehensive audit of every score in the database and the results were devastating. <strong>72.5% of all computed scores were effectively meaningless</strong> because they relied on fields that had no data.</p>
+<p>We ran a comprehensive audit of every score in the database and the results were devastating. <strong><span class="editorial-stat" title="Based on historical analysis at time of writing">72.5%</span> of all computed scores were effectively meaningless</strong> because they relied on fields that had no data.</p>
 <p>The audit uncovered five critical problems:</p>
 <ul>
 <li><strong>Ghost fields:</strong> The formula referenced data columns that did not exist in any of our six data sources. Education level, MPLADS utilization, and constituency development metrics were scored as zeros, dragging down every MP</li>
@@ -123,7 +125,7 @@ export const articles: BlogArticle[] = [
 <li><strong>Criminal severity not weighted:</strong> An MP with one murder charge scored the same as one with a traffic violation</li>
 <li><strong>2019 data missing entirely:</strong> The 2019 election -- the most recent completed election at the time -- had zero records ingested</li>
 </ul>
-<p>We killed the scoring formula, fixed entity resolution using TCPD unique IDs as the canonical key, ingested 2014 and 2024 election data, and rebuilt the formula from scratch with <strong>data sufficiency gates</strong>: if a score component has less than 50% of its required data points, it is marked as "insufficient data" rather than computed from garbage.</p>
+<p>We killed the scoring formula, fixed entity resolution using TCPD unique IDs as the canonical key, ingested 2014 and 2024 election data, and rebuilt the formula from scratch with <strong>data sufficiency gates</strong>: if a score component has less than <span class="editorial-stat" title="Based on historical analysis at time of writing">50%</span> of its required data points, it is marked as "insufficient data" rather than computed from garbage.</p>
 <blockquote>A score computed from missing data is worse than no score at all. It creates false confidence.</blockquote>
 </section>
 
@@ -143,7 +145,7 @@ export const articles: BlogArticle[] = [
 <section id="what-we-learned">
 <h2>What We Learned</h2>
 <ul>
-<li><strong>Download before you scrape.</strong> 80% of Indian political data already exists in structured form on GitHub and academic portals. The instinct to build scrapers first wasted time we did not have</li>
+<li><strong>Download before you scrape.</strong> <span class="editorial-stat" title="Based on historical analysis at time of writing">80%</span> of Indian political data already exists in structured form on GitHub and academic portals. The instinct to build scrapers first wasted time we did not have</li>
 <li><strong>Audit your scores before you ship.</strong> The P0 audit was painful but it saved us from shipping a dashboard that would have given voters provably wrong information</li>
 <li><strong>Entity resolution is the hardest problem.</strong> Not the ML, not the UI, not the infrastructure. Matching "JYOTIRADITYA M. SCINDIA" to "Shri Jyotiraditya M Scindia" across six datasets is where the real engineering challenge lives</li>
 <li><strong>Free tiers are production-ready.</strong> Neon Postgres, Vercel, Cloudflare R2, GitHub Actions -- zero cost, zero compromises for our scale</li>
@@ -162,6 +164,7 @@ export const articles: BlogArticle[] = [
     readTime: '10 min read',
     heroImage: '',
     author: authors.team,
+    disclaimer: 'Statistics cited in this article are based on historical analysis and may not reflect current database values.',
     metadata: [
       { label: 'Records Analyzed', value: '500,000+' },
       { label: 'Elections Covered', value: '1962 -- 2024' },
@@ -181,21 +184,21 @@ export const articles: BlogArticle[] = [
     content: `
 <section id="the-criminal-advantage">
 <h2>The Criminal Advantage</h2>
-<p>This is the finding that stops people mid-sentence: <strong>candidates with declared criminal cases win elections 2.3 times more often than clean candidates</strong>.</p>
-<p>This is not a bug in the data. It is a consistent pattern across multiple election cycles, confirmed by both our analysis and independent research by ADR (Association for Democratic Reforms). The win rate for candidates with criminal cases is approximately 15.5%, compared to 6.7% for those without.</p>
+<p>This is the finding that stops people mid-sentence: <strong>candidates with declared criminal cases win elections <span class="editorial-stat" title="Based on historical analysis at time of writing">2.3 times</span> more often than clean candidates</strong>.</p>
+<p>This is not a bug in the data. It is a consistent pattern across multiple election cycles, confirmed by both our analysis and independent research by ADR (Association for Democratic Reforms). The win rate for candidates with criminal cases is approximately <span class="editorial-stat" title="Based on historical analysis at time of writing">15.5%</span>, compared to <span class="editorial-stat" title="Based on historical analysis at time of writing">6.7%</span> for those without.</p>
 <ul>
 <li><strong>Serious criminal cases</strong> (IPC sections related to murder, kidnapping, extortion) correlate with even higher win rates in certain states</li>
 <li><strong>Bihar, UP, and Maharashtra</strong> consistently lead in the proportion of elected MPs with criminal backgrounds</li>
-<li><strong>The trend is worsening:</strong> the percentage of MPs with criminal cases has increased from 24% in 2004 to 43% in 2024</li>
+<li><strong>The trend is worsening:</strong> the percentage of MPs with criminal cases has increased from <span class="editorial-stat" title="Based on historical analysis at time of writing">24%</span> in 2004 to <span class="editorial-stat" title="Based on historical analysis at time of writing">43%</span> in 2024</li>
 </ul>
 <p>Why does crime pay at the ballot box? The data suggests three factors: name recognition (criminal cases generate media coverage), the ability to fund expensive campaigns, and the capacity to "get things done" through extra-legal channels -- which voters in under-served constituencies sometimes value over clean governance.</p>
-<blockquote>43% of MPs elected in 2024 have declared criminal cases against them. This is not an aberration -- it is the trend line.</blockquote>
+<blockquote><span class="editorial-stat" title="Based on historical analysis at time of writing">43%</span> of MPs elected in 2024 have declared criminal cases against them. This is not an aberration -- it is the trend line.</blockquote>
 </section>
 
 <section id="the-crorepati-takeover">
 <h2>The Crorepati Takeover</h2>
-<p>A "crorepati" is someone with assets exceeding 1 crore INR (approximately $120,000 USD). In 2004, 30% of elected MPs were crorepatis. By 2024, that number has risen to <strong>93%</strong>.</p>
-<p>The median asset declaration for an elected MP in 2024 is approximately INR 5.2 crore. The average is significantly higher, skewed by ultra-wealthy MPs with declarations exceeding INR 1,000 crore.</p>
+<p>A "crorepati" is someone with assets exceeding 1 crore INR (approximately $120,000 USD). In 2004, <span class="editorial-stat" title="Based on historical analysis at time of writing">30%</span> of elected MPs were crorepatis. By 2024, that number has risen to <strong><span class="editorial-stat" title="Based on historical analysis at time of writing">93%</span></strong>.</p>
+<p>The median asset declaration for an elected MP in 2024 is approximately <span class="editorial-stat" title="Based on historical analysis at time of writing">INR 5.2 crore</span>. The average is significantly higher, skewed by ultra-wealthy MPs with declarations exceeding INR 1,000 crore.</p>
 <ul>
 <li><strong>Entry barrier:</strong> Running for Parliament now effectively requires crore-level wealth, shutting out middle-class and lower-income candidates</li>
 <li><strong>Campaign spending:</strong> Despite official limits of INR 95 lakh per constituency, actual spending routinely exceeds INR 20-50 crore according to multiple analyses</li>
@@ -207,16 +210,16 @@ export const articles: BlogArticle[] = [
 <h2>Wealth Growth Outliers</h2>
 <p>By comparing successive affidavit declarations, we can track how politicians' declared wealth changes over time. Some of the numbers are staggering.</p>
 <ul>
-<li><strong>Jyotiraditya Scindia:</strong> Declared assets grew from approximately INR 38 crore to INR 3,950 crore -- a growth of 10,294% across his parliamentary career</li>
-<li><strong>Several MPs</strong> show wealth growth rates exceeding 1,000% between consecutive elections, far outpacing any market index or business benchmark</li>
-<li><strong>The median wealth growth</strong> for re-elected MPs is approximately 200-300% per term -- still significantly above inflation and market returns</li>
+<li><strong>Jyotiraditya Scindia:</strong> Declared assets grew from approximately INR 38 crore to INR 3,950 crore -- a growth of <span class="editorial-stat" title="Based on historical analysis at time of writing">10,294%</span> across his parliamentary career</li>
+<li><strong>Several MPs</strong> show wealth growth rates exceeding <span class="editorial-stat" title="Based on historical analysis at time of writing">1,000%</span> between consecutive elections, far outpacing any market index or business benchmark</li>
+<li><strong>The median wealth growth</strong> for re-elected MPs is approximately <span class="editorial-stat" title="Based on historical analysis at time of writing">200-300%</span> per term -- still significantly above inflation and market returns</li>
 </ul>
-<p>To be clear: wealth growth alone does not prove corruption. Legitimate business ventures, inheritance, and market appreciation can explain some growth. But when a salaried MP's declared assets grow by 10,000%, the numbers demand scrutiny.</p>
+<p>To be clear: wealth growth alone does not prove corruption. Legitimate business ventures, inheritance, and market appreciation can explain some growth. But when a salaried MP's declared assets grow by <span class="editorial-stat" title="Based on historical analysis at time of writing">10,000%</span>, the numbers demand scrutiny.</p>
 </section>
 
 <section id="ghost-mps">
 <h2>The 147 Ghost MPs</h2>
-<p>During our P0 audit, we discovered <strong>147 MPs who existed in election results but could not be matched to any parliamentary activity records</strong>. They won elections. They presumably took office. But in our combined dataset of six sources, they left no trace of parliamentary participation.</p>
+<p>During our P0 audit, we discovered <strong><span class="editorial-stat" title="Based on historical analysis at time of writing">147</span> MPs who existed in election results but could not be matched to any parliamentary activity records</strong>. They won elections. They presumably took office. But in our combined dataset of six sources, they left no trace of parliamentary participation.</p>
 <ul>
 <li><strong>Zero questions asked</strong> in Parliament</li>
 <li><strong>Zero debates participated in</strong></li>
@@ -242,10 +245,10 @@ export const articles: BlogArticle[] = [
 <h2>What the Data Says</h2>
 <p>We are not editorializing. Politia does not tell you who to vote for. But the data paints a clear picture:</p>
 <ul>
-<li><strong>Indian democracy is increasingly a rich person's game.</strong> 93% of MPs are crorepatis. The entry barrier is rising every cycle</li>
-<li><strong>Criminal records are an electoral advantage, not a liability.</strong> The 2.3x win rate premium for candidates with criminal cases has been stable for two decades</li>
+<li><strong>Indian democracy is increasingly a rich person's game.</strong> <span class="editorial-stat" title="Based on historical analysis at time of writing">93%</span> of MPs are crorepatis. The entry barrier is rising every cycle</li>
+<li><strong>Criminal records are an electoral advantage, not a liability.</strong> The <span class="editorial-stat" title="Based on historical analysis at time of writing">2.3x</span> win rate premium for candidates with criminal cases has been stable for two decades</li>
 <li><strong>Parliamentary participation varies wildly.</strong> Some MPs ask 500+ questions per term. Others ask zero. Voters deserve to know which category their representative falls into</li>
-<li><strong>Data transparency is still primitive.</strong> The fact that 147 MPs can "vanish" from records shows how much work remains in making Indian democracy truly transparent</li>
+<li><strong>Data transparency is still primitive.</strong> The fact that <span class="editorial-stat" title="Based on historical analysis at time of writing">147</span> MPs can "vanish" from records shows how much work remains in making Indian democracy truly transparent</li>
 </ul>
 <p>Every number in this article is derived from official Election Commission affidavits, PRS Legislative Research data, and parliamentary records. The methodology is open. The data is auditable. If a number is wrong, we want to know.</p>
 </section>
@@ -261,6 +264,7 @@ export const articles: BlogArticle[] = [
     readTime: '8 min read',
     heroImage: '',
     author: authors.team,
+    disclaimer: 'Statistics cited in this article are based on historical analysis and may not reflect current database values.',
     metadata: [
       { label: 'Current Size', value: '~50 MB (PostgreSQL)' },
       { label: 'Target Size', value: '16 TB (lakehouse)' },
@@ -282,18 +286,18 @@ export const articles: BlogArticle[] = [
     content: `
 <section id="where-we-are">
 <h2>Where We Are</h2>
-<p>Politia today runs on a PostgreSQL database that is approximately 50 MB. It contains election results, MP biographical data, parliamentary activity records, asset declarations, and criminal case disclosures from six official data sources. The backend is a FastAPI application with a hexagonal architecture. The frontend is Next.js 16 with React 19 server components.</p>
+<p>Politia today runs on a PostgreSQL database that is approximately <span class="editorial-stat" title="Based on historical analysis at time of writing">50 MB</span>. It contains election results, MP biographical data, parliamentary activity records, asset declarations, and criminal case disclosures from six official data sources. The backend is a FastAPI application with a hexagonal architecture. The frontend is Next.js 16 with React 19 server components.</p>
 <p>It works. It is fast. It is free to run. But it is a fraction of what Indian political data could be.</p>
 </section>
 
 <section id="the-vision">
 <h2>The Vision</h2>
 <p>We want to build <strong>India's largest open political data lakehouse</strong> -- a single, queryable repository that contains every piece of public information about every elected representative, from independence to today.</p>
-<p>The full dataset, when assembled, would be approximately <strong>16 TB</strong>:</p>
+<p>The full dataset, when assembled, would be approximately <strong><span class="editorial-stat" title="Based on historical analysis at time of writing">16 TB</span></strong>:</p>
 <ul>
 <li><strong>Structured data</strong> (~2 GB): Election results, affidavits, attendance records, committee memberships, voting records from 1952 to present</li>
 <li><strong>Documents</strong> (~500 GB): Scanned affidavits, FIR copies, property declarations, committee reports in PDF</li>
-<li><strong>Parliamentary audio</strong> (~15 TB): Approximately 17,000 hours of Lok Sabha and Rajya Sabha proceedings available from Sansad TV archives</li>
+<li><strong>Parliamentary audio</strong> (~15 TB): Approximately <span class="editorial-stat" title="Based on historical analysis at time of writing">17,000 hours</span> of Lok Sabha and Rajya Sabha proceedings available from Sansad TV archives</li>
 <li><strong>News corpus</strong> (~500 GB): Timestamped news articles about MPs from major outlets, for cross-referencing claims against records</li>
 </ul>
 <blockquote>The goal is not to hoard data. It is to make every public record about every public servant genuinely, usably public.</blockquote>
@@ -324,14 +328,14 @@ export const articles: BlogArticle[] = [
 
 <section id="phase-3">
 <h2>Phase 3: Audio & NLP</h2>
-<p>This is the ambitious phase. Indian Parliament has approximately <strong>17,000 hours of recorded proceedings</strong> available through Sansad TV. This audio is currently unsearchable -- you cannot find what your MP said about a specific topic without manually scrubbing through hours of footage.</p>
+<p>This is the ambitious phase. Indian Parliament has approximately <strong><span class="editorial-stat" title="Based on historical analysis at time of writing">17,000 hours</span> of recorded proceedings</strong> available through Sansad TV. This audio is currently unsearchable -- you cannot find what your MP said about a specific topic without manually scrubbing through hours of footage.</p>
 <ul>
 <li><strong>Speech-to-text pipeline:</strong> Whisper large-v3 for transcription, handling Hindi-English code-switching that is ubiquitous in parliamentary proceedings</li>
 <li><strong>Speaker diarization:</strong> Identify which MP is speaking at any given moment, linked to our entity database</li>
 <li><strong>Topic extraction:</strong> Automated tagging of parliamentary discussions by topic (agriculture, defense, education, etc.)</li>
 <li><strong>Searchable transcripts:</strong> Full-text search across all parliamentary proceedings, linked to specific MPs and dates</li>
 </ul>
-<p>Processing 17,000 hours of audio is expensive at cloud rates. Our plan: community-distributed processing where contributors donate compute cycles, similar to how Folding@Home distributes protein folding calculations.</p>
+<p>Processing <span class="editorial-stat" title="Based on historical analysis at time of writing">17,000 hours</span> of audio is expensive at cloud rates. Our plan: community-distributed processing where contributors donate compute cycles, similar to how Folding@Home distributes protein folding calculations.</p>
 </section>
 
 <section id="phase-4">

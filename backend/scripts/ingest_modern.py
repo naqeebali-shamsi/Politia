@@ -304,8 +304,8 @@ def main():
     # Validation
     with engine.connect() as conn:
         for year in [2014, 2024]:
-            count = conn.execute(text(f"SELECT COUNT(*) FROM election_records WHERE election_year = {year}")).scalar()
-            winners = conn.execute(text(f"SELECT COUNT(*) FROM election_records WHERE election_year = {year} AND result = 'Won'")).scalar()
+            count = conn.execute(text("SELECT COUNT(*) FROM election_records WHERE election_year = :year"), {"year": year}).scalar()
+            winners = conn.execute(text("SELECT COUNT(*) FROM election_records WHERE election_year = :year AND result = 'Won'"), {"year": year}).scalar()
             logger.info(f"  {year}: {count} records, {winners} winners")
 
         total_pols = conn.execute(text("SELECT COUNT(*) FROM politicians")).scalar()
